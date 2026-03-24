@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Garde-meuble.ma – Accueil</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #1664c0;
+      --primary-dark: #0f4a9c;
+      --gray-700: #404040;
+      --gray-800: #222222;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      background: var(--primary);
+      display: flex;
+    }
+
+    /* ── Panneau gauche : branding ── */
+    .left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 60px 50px;
+      color: #fff;
+    }
+    .brand-logo {
+      width: 90px; height: 90px;
+      background: rgba(255,255,255,.15);
+      border-radius: 22px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 44px;
+      margin: 0 auto 28px;
+    }
+    .brand-name {
+      font-size: 42px; font-weight: 800;
+      letter-spacing: 3px; margin-bottom: 8px;
+    }
+    .brand-tag {
+      font-size: 13px; color: rgba(255,255,255,.65);
+      letter-spacing: 1.5px; text-transform: uppercase;
+      margin-bottom: 52px;
+    }
+    .features { list-style: none; max-width: 360px; width: 100%; }
+    .features li {
+      display: flex; align-items: center; gap: 14px;
+      padding: 13px 0;
+      color: rgba(255,255,255,.8); font-size: 14px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+    }
+    .features li:last-child { border-bottom: none; }
+    .feat-icon {
+      width: 38px; height: 38px; flex-shrink: 0;
+      border-radius: 10px;
+      background: rgba(255,255,255,.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px;
+    }
+
+    /* ── Panneau droit : sélection ── */
+    .right {
+      width: 460px;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 48px;
+    }
+    .right-header { margin-bottom: 40px; }
+    .right-header h1 { font-size: 28px; font-weight: 800; color: var(--gray-800); margin-bottom: 8px; }
+    .right-header p  { font-size: 14px; color: #737373; }
+
+    /* ── Cartes d'accès ── */
+    .cards { display: flex; flex-direction: column; gap: 18px; }
+
+    .card {
+      border: 2px solid #e8e8e8;
+      border-radius: 14px;
+      padding: 24px 22px;
+      cursor: pointer;
+      transition: all .22s;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      text-decoration: none;
+    }
+    .card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 6px 20px rgba(22,100,192,.13);
+      transform: translateY(-2px);
+    }
+    .card-icon {
+      width: 56px; height: 56px; flex-shrink: 0;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; color: #fff;
+    }
+    .card-icon.admin { background: var(--primary); }
+    .card-icon.client { background: var(--gray-700); }
+
+    .card-body { flex: 1; }
+    .card-title { font-size: 16px; font-weight: 700; color: var(--gray-800); margin-bottom: 4px; }
+    .card-desc  { font-size: 12px; color: #a3a3a3; }
+
+    .card-arrow {
+      width: 36px; height: 36px; flex-shrink: 0;
+      border-radius: 50%;
+      background: #f5f5f5;
+      display: flex; align-items: center; justify-content: center;
+      color: #a3a3a3; font-size: 14px;
+      transition: all .2s;
+    }
+    .card:hover .card-arrow {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .footer {
+      margin-top: 40px;
+      font-size: 11px;
+      color: #d4d4d4;
+      text-align: center;
+    }
+
+    @media(max-width: 820px) {
+      .left  { display: none; }
+      .right { width: 100%; padding: 40px 28px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Gauche : branding -->
+<div class="left">
+  <div class="brand-logo" style="background:transparent;padding:0;width:auto;height:auto;border-radius:0">
+    <img src="images/logo.png" alt="Garde-meuble.ma" style="max-width:260px;width:100%;display:block;filter:drop-shadow(0 2px 12px rgba(0,0,0,0.18))">
+  </div>
+  <div class="brand-tag" style="margin-top:18px">Faites comme chez vous !</div>
+  <ul class="features">
+    <li><span class="feat-icon"><i class="fas fa-box-open"></i></span> Gestion complète des boxes</li>
+    <li><span class="feat-icon"><i class="fas fa-file-contract"></i></span> Contrats &amp; signature électronique</li>
+    <li><span class="feat-icon"><i class="fas fa-credit-card"></i></span> Suivi des paiements &amp; factures</li>
+    <li><span class="feat-icon"><i class="fas fa-chart-bar"></i></span> Tableaux de bord &amp; statistiques</li>
+    <li><span class="feat-icon"><i class="fas fa-shield-alt"></i></span> Sécurité &amp; accès par rôle</li>
+  </ul>
+</div>
+
+<!-- Droite : sélection directe -->
+<div class="right">
+  <div class="right-header">
+    <h1>Bienvenue 👋</h1>
+    <p>Choisissez votre espace pour accéder à la plateforme</p>
+  </div>
+
+  <div class="cards">
+
+    <!-- Admin -->
+    <a class="card" href="admin.html" id="btn-admin">
+      <div class="card-icon admin">
+        <i class="fas fa-user-shield"></i>
+      </div>
+      <div class="card-body">
+        <div class="card-title">Espace Administrateur</div>
+        <div class="card-desc">Gestion des boxes, contrats, clients et recouvrement</div>
+      </div>
+      <div class="card-arrow"><i class="fas fa-arrow-right"></i></div>
+    </a>
+
+    <!-- Client -->
+    <a class="card" href="client.html" id="btn-client">
+      <div class="card-icon client">
+        <i class="fas fa-user"></i>
+      </div>
+      <div class="card-body">
+        <div class="card-title">Espace Client</div>
+        <div class="card-desc">Consultez vos contrats, factures et informations de stockage</div>
+      </div>
+      <div class="card-arrow"><i class="fas fa-arrow-right"></i></div>
+    </a>
+
+  </div>
+
+  <div class="footer">© 2025 Garde-meuble.ma – Tous droits réservés</div>
+</div>
+
+<script src="js/utils.js"></script>
+<script>
+  // Injecter un utilisateur fictif selon la destination (pour que les pages fonctionnent)
+  document.getElementById('btn-admin').addEventListener('click', function(e) {
+    e.preventDefault();
+    Auth.set({
+      id: 'guest-admin',
+      prenom: 'Administrateur', nom: '',
+      email: 'admin@amanbox.ma',
+      role: 'admin',
+      actif: true,
+      hub: 'CAS'
+    });
+    window.location.href = 'admin.html';
+  });
+
+  document.getElementById('btn-client').addEventListener('click', function(e) {
+    e.preventDefault();
+    Auth.set({
+      id: 'guest-client',
+      prenom: 'Client', nom: '',
+      email: 'client@amanbox.ma',
+      role: 'client',
+      actif: true,
+      hub: 'CAS'
+    });
+    window.location.href = 'client.html';
+  });
+</script>
+
+</body>
+</html>

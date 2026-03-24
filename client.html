@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garde-meuble.ma – Mon Espace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <a class="sidebar-logo" href="index.html">
+      <img src="images/logo.png" alt="Garde-meuble.ma" style="max-width:150px;width:100%;display:block;">
+      <span class="logo-sub" style="display:block;text-align:center;margin-top:4px">Mon Espace</span>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Mon compte</div>
+      <a class="nav-item active" data-page="accueil" onclick="showPage('accueil')"><i class="fas fa-home"></i> Accueil</a>
+      <a class="nav-item" data-page="mes-boxes" onclick="showPage('mes-boxes')"><i class="fas fa-box"></i> Mes Boxes</a>
+      <a class="nav-item" data-page="mes-contrats" onclick="showPage('mes-contrats')"><i class="fas fa-file-contract"></i> Mes Contrats</a>
+      <a class="nav-item" data-page="mes-paiements" onclick="showPage('mes-paiements')">
+        <i class="fas fa-credit-card"></i> Mes Paiements
+        <span class="nav-badge hidden" id="badge-impaye">0</span>
+      </a>
+      <a class="nav-item" data-page="mes-relances" onclick="showPage('mes-relances')">
+        <i class="fas fa-bell"></i> Mes Relances
+        <span class="nav-badge hidden" id="badge-relances-client">0</span>
+      </a>
+      <div class="nav-section-title">Découvrir</div>
+      <a class="nav-item" data-page="boxes-dispo" onclick="showPage('boxes-dispo')"><i class="fas fa-search"></i> Boxes disponibles</a>
+      <div class="nav-section-title">Profil</div>
+      <a class="nav-item" data-page="profil" onclick="showPage('profil')"><i class="fas fa-user-cog"></i> Mon Profil</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info-sidebar">
+        <div class="user-avatar" id="sidebar-avatar">CL</div>
+        <div>
+          <div class="user-name-small" id="sidebar-name">Client</div>
+          <div class="user-role-small">Client Amanbox</div>
+        </div>
+        <button class="btn-logout" onclick="Auth.logout()" title="Déconnexion"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+
+    <!-- Bandeau mode local (GitHub Pages) -->
+    <div id="offline-banner" style="display:none;background:#fffbeb;border-bottom:1px solid #fcd34d;padding:7px 20px;font-size:12px;color:#92400e;display:flex;align-items:center;gap:8px">
+      <i class="fas fa-database" style="color:#d97706"></i>
+      <span><strong>Mode local activé</strong> — Les données sont sauvegardées dans ce navigateur uniquement.</span>
+    </div>
+
+    <header class="topbar">
+      <button class="topbar-btn" onclick="toggleSidebar()" id="menu-btn">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="topbar-title" id="topbar-title">Mon Accueil</div>
+      <div class="topbar-actions">
+        <a class="topbar-btn" href="index.html" title="Retour à l'accueil" style="display:flex;align-items:center;justify-content:center;text-decoration:none"><i class="fas fa-home"></i></a>
+      </div>
+    </header>
+
+    <!-- ACCUEIL -->
+    <div class="page-content" id="page-accueil">
+      <div class="page-header">
+        <div>
+          <h1 id="welcome-title">Bonjour 👋</h1>
+          <p>Bienvenue dans votre espace client Amanbox</p>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-box"></i></div>
+          <div class="stat-info"><div class="stat-value" id="c-stat-boxes">—</div><div class="stat-label">Boxes actives</div></div></div>
+        <div class="stat-card"><div class="stat-icon green"><i class="fas fa-file-contract"></i></div>
+          <div class="stat-info"><div class="stat-value" id="c-stat-contrats">—</div><div class="stat-label">Contrats actifs</div></div></div>
+        <div class="stat-card"><div class="stat-icon orange"><i class="fas fa-credit-card"></i></div>
+          <div class="stat-info"><div class="stat-value" id="c-stat-prochain">—</div><div class="stat-label">Prochain paiement</div></div></div>
+        <div class="stat-card"><div class="stat-icon red"><i class="fas fa-exclamation-circle"></i></div>
+          <div class="stat-info"><div class="stat-value" id="c-stat-impaye">—</div><div class="stat-label">Factures impayées</div></div></div>
+      </div>
+      <div id="alerte-impayes" class="hidden" style="background:rgba(220,38,38,0.06);border:1.5px solid rgba(220,38,38,0.2);border-radius:10px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px">
+        <i class="fas fa-exclamation-triangle" style="color:var(--danger);font-size:22px"></i>
+        <div style="flex:1"><div style="font-weight:700;color:var(--danger)">Paiements en retard</div>
+          <div style="font-size:13px;color:var(--gray-600)" id="alerte-text"></div></div>
+        <button class="btn btn-danger btn-sm" onclick="showPage('mes-paiements')">Voir mes factures</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div class="card">
+          <div class="card-header"><h2><i class="fas fa-box"></i> Mes boxes actives</h2>
+            <button class="btn btn-sm btn-primary" onclick="showPage('mes-boxes')">Voir tout</button></div>
+          <div id="accueil-boxes-list"><div class="loading-spinner"><div class="spinner"></div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h2><i class="fas fa-credit-card"></i> Dernières factures</h2>
+            <button class="btn btn-sm btn-outline" onclick="showPage('mes-paiements')">Voir tout</button></div>
+          <div id="accueil-pays-list"><div class="loading-spinner"><div class="spinner"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MES BOXES -->
+    <div class="page-content hidden" id="page-mes-boxes">
+      <div class="page-header">
+        <div><h1>Mes Boxes</h1><p>Vos espaces de stockage Amanbox</p></div>
+      </div>
+      <div id="mes-boxes-grid" class="boxes-grid"></div>
+    </div>
+
+    <!-- MES CONTRATS -->
+    <div class="page-content hidden" id="page-mes-contrats">
+      <div class="page-header">
+        <div><h1>Mes Contrats</h1><p>Historique et statut de vos contrats de location</p></div>
+      </div>
+      <div id="mes-contrats-list"></div>
+    </div>
+
+    <!-- MES PAIEMENTS -->
+    <div class="page-content hidden" id="page-mes-paiements">
+      <div class="page-header">
+        <div><h1>Mes Paiements</h1><p>Suivi de vos factures et règlements</p></div>
+      </div>
+      <div class="filters-bar">
+        <span class="filter-label"><i class="fas fa-filter"></i></span>
+        <select class="filter-select" id="c-filter-pay-statut" onchange="filterMesPaiements()">
+          <option value="">Tous statuts</option>
+          <option value="payé">Payé</option>
+          <option value="en_attente">En attente</option>
+          <option value="en_retard">En retard</option>
+        </select>
+        <input type="month" class="filter-input" id="c-filter-pay-mois" onchange="filterMesPaiements()" style="min-width:140px">
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-receipt"></i> Mes Factures</h2>
+          <span id="c-paiements-count" class="badge badge-primary">0</span>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>N° Facture</th><th>Box</th><th>Période</th>
+                <th>Montant TTC</th><th>Échéance</th><th>Mode</th><th>Statut</th>
+              </tr>
+            </thead>
+            <tbody id="c-tbody-paiements"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- MES RELANCES -->
+    <div class="page-content hidden" id="page-mes-relances">
+      <div class="page-header">
+        <div><h1>Mes Relances</h1><p>Notifications de paiement reçues</p></div>
+        <button class="btn btn-primary" onclick="showPage('mes-paiements')"><i class="fas fa-credit-card"></i> Voir mes paiements</button>
+      </div>
+      <div id="mes-relances-list"><div class="loading-spinner"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- BOXES DISPONIBLES -->
+    <div class="page-content hidden" id="page-boxes-dispo">
+      <div class="page-header">
+        <div><h1>Boxes Disponibles</h1><p>Réservez un espace supplémentaire</p></div>
+      </div>
+      <div class="filters-bar">
+        <span class="filter-label"><i class="fas fa-filter"></i></span>
+        <select class="filter-select" id="c-filter-dispo-type" onchange="filterBoxesDispo()">
+          <option value="">Tous types</option>
+          <option value="small">Petite (2m²)</option>
+          <option value="medium">Moyenne (5m²)</option>
+          <option value="large">Grande (10m²)</option>
+          <option value="xl">XL (20m²)</option>
+        </select>
+        <select class="filter-select" id="c-filter-dispo-clim" onchange="filterBoxesDispo()">
+          <option value="">Toutes options</option>
+          <option value="true">Climatisée</option>
+          <option value="false">Non climatisée</option>
+        </select>
+        <input type="text" class="filter-input" id="c-filter-dispo-search" placeholder="🔍 N° de box..." oninput="filterBoxesDispo()">
+      </div>
+      <div class="boxes-grid" id="boxes-dispo-grid"></div>
+    </div>
+
+    <!-- PROFIL -->
+    <div class="page-content hidden" id="page-profil">
+      <div class="page-header">
+        <div><h1>Mon Profil</h1><p>Mes informations personnelles</p></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div class="card">
+          <div class="card-header"><h2><i class="fas fa-user"></i> Informations personnelles</h2></div>
+          <div class="card-body">
+            <form id="form-profil" onsubmit="saveProfil(event)">
+              <div class="form-grid-2">
+                <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-control" id="p-nom" required></div>
+                <div class="form-group"><label class="form-label">Prénom</label><input type="text" class="form-control" id="p-prenom" required></div>
+              </div>
+              <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-control" id="p-email" required></div>
+              <div class="form-group"><label class="form-label">Téléphone</label><input type="tel" class="form-control" id="p-tel"></div>
+              <div class="form-group"><label class="form-label">Adresse</label><input type="text" class="form-control" id="p-adresse"></div>
+              <div class="form-grid-2">
+                <div class="form-group"><label class="form-label">Ville</label><input type="text" class="form-control" id="p-ville"></div>
+                <div class="form-group"><label class="form-label">Code postal</label><input type="text" class="form-control" id="p-cp"></div>
+              </div>
+              <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer</button>
+            </form>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h2><i class="fas fa-id-card"></i> Pièce d'identité &amp; Sécurité</h2></div>
+          <div class="card-body">
+            <div id="profil-id-info" style="margin-bottom:20px;padding:14px;background:var(--gray-50);border-radius:8px;border:1px solid var(--gray-200)"></div>
+            <hr class="divider">
+            <h4 style="font-size:13px;font-weight:700;margin-bottom:14px">Changer le mot de passe</h4>
+            <form id="form-pwd" onsubmit="changePwd(event)">
+              <div class="form-group"><label class="form-label">Nouveau mot de passe</label><input type="password" class="form-control" id="new-pwd" placeholder="••••••••" minlength="6" autocomplete="new-password"></div>
+              <div class="form-group"><label class="form-label">Confirmer</label><input type="password" class="form-control" id="confirm-pwd" placeholder="••••••••" autocomplete="new-password"></div>
+              <button type="submit" class="btn btn-warning"><i class="fas fa-key"></i> Changer le mot de passe</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal Contrat Client -->
+<div class="modal-overlay" id="modal-contrat-client">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <h3><i class="fas fa-file-contract"></i> Mon Contrat</h3>
+      <button class="modal-close" onclick="Modal.close('modal-contrat-client')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="contrat-client-body">
+      <div class="loading-spinner"><div class="spinner"></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="Modal.close('modal-contrat-client')">Fermer</button>
+      <button class="btn btn-success" id="btn-signer-client" onclick="signerContratClient()">
+        <i class="fas fa-pen-nib"></i> Signer le contrat
+      </button>
+      <button class="btn btn-primary" onclick="window.print()"><i class="fas fa-print"></i> Imprimer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Demande Box -->
+<div class="modal-overlay" id="modal-demande-box">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fas fa-box"></i> Demande de Box</h3>
+      <button class="modal-close" onclick="Modal.close('modal-demande-box')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="demande-box-info" style="margin-bottom:16px"></div>
+      <div class="form-group">
+        <label class="form-label">Message (optionnel)</label>
+        <textarea class="form-control" id="demande-message" rows="4" placeholder="Ex: Je souhaite louer cette box à partir du 1er janvier..."></textarea>
+      </div>
+      <div style="background:rgba(37,99,168,0.05);border-radius:8px;padding:12px;font-size:13px;color:var(--gray-600)">
+        <i class="fas fa-info-circle" style="color:var(--primary-light)"></i>
+        Notre équipe vous contactera sous 24h pour finaliser votre location.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="Modal.close('modal-demande-box')">Annuler</button>
+      <button class="btn btn-primary" onclick="envoyerDemandeBox()">
+        <i class="fas fa-paper-plane"></i> Envoyer la demande
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="js/utils.js"></script>
+<script src="js/client.js"></script>
+</body>
+</html>

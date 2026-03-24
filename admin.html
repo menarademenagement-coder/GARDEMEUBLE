@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garde-meuble.ma – Administration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app-wrapper">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <a class="sidebar-logo" href="index.html">
+      <img src="images/logo.png" alt="Garde-meuble.ma" style="max-width:150px;width:100%;display:block;">
+      <span class="logo-sub" style="display:block;text-align:center;margin-top:4px">Administration</span>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Tableau de bord</div>
+      <a class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+      </a>
+      <a class="nav-item" data-page="stats" onclick="showPage('stats')">
+        <i class="fas fa-chart-line"></i> Statistiques
+      </a>
+
+      <div class="nav-section-title">Gestion</div>
+      <a class="nav-item" data-page="boxes" onclick="showPage('boxes')">
+        <i class="fas fa-box"></i> Boxes
+      </a>
+      <a class="nav-item" data-page="contrats" onclick="showPage('contrats')">
+        <i class="fas fa-file-contract"></i> Contrats
+      </a>
+      <a class="nav-item" data-page="clients" onclick="showPage('clients')">
+        <i class="fas fa-users"></i> Clients
+      </a>
+
+      <div class="nav-section-title">Recouvrement</div>
+      <a class="nav-item" data-page="paiements" onclick="showPage('paiements')">
+        <i class="fas fa-exclamation-triangle"></i> Recouvrement critique
+      </a>
+      <a class="nav-item" data-page="recouvrement-mois" onclick="showPage('recouvrement-mois')">
+        <i class="fas fa-calendar-check"></i> Recouvrement du mois
+      </a>
+      <a class="nav-item" data-page="relances" onclick="showPage('relances')">
+        <i class="fas fa-bell"></i> Relances
+        <span class="nav-badge hidden" id="badge-relances">0</span>
+      </a>
+
+      <div class="nav-section-title">Historique</div>
+      <a class="nav-item" data-page="historique" onclick="showPage('historique')">
+        <i class="fas fa-history"></i> Activité
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info-sidebar">
+        <div class="user-avatar" id="sidebar-avatar">AD</div>
+        <div>
+          <div class="user-name-small" id="sidebar-name">Admin</div>
+          <div class="user-role-small">Administrateur</div>
+        </div>
+        <button class="btn-logout" onclick="Auth.logout()" title="Déconnexion">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+
+    <!-- Bandeau mode local (GitHub Pages) -->
+    <div id="offline-banner" style="display:none;background:#fffbeb;border-bottom:1px solid #fcd34d;padding:7px 20px;font-size:12px;color:#92400e;display:flex;align-items:center;gap:8px">
+      <i class="fas fa-database" style="color:#d97706"></i>
+      <span><strong>Mode local activé</strong> — Les données sont sauvegardées dans ce navigateur uniquement (GitHub Pages ne dispose pas de base de données en ligne).</span>
+    </div>
+
+    <header class="topbar">
+      <button class="topbar-btn" onclick="toggleSidebar()" id="menu-btn">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-actions">
+        <div class="topbar-search">
+          <i class="fas fa-search"></i>
+          <input type="text" id="global-search" placeholder="Rechercher..." oninput="handleGlobalSearch(this.value)">
+        </div>
+        <a class="topbar-btn" href="index.html" title="Retour à l'accueil" style="display:flex;align-items:center;justify-content:center;text-decoration:none">
+          <i class="fas fa-home"></i>
+        </a>
+      </div>
+    </header>
+
+    <!-- ================== PAGE: DASHBOARD ================== -->
+    <div class="page-content" id="page-dashboard">
+      <div class="page-header">
+        <div>
+          <h1>Tableau de bord</h1>
+          <p id="dash-date">Chargement...</p>
+        </div>
+        <button class="btn btn-primary" onclick="refreshDashboard()">
+          <i class="fas fa-sync-alt"></i> Actualiser
+        </button>
+      </div>
+
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fas fa-box"></i></div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-boxes-total">—</div>
+            <div class="stat-label">Total boxes</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-boxes-dispo">—</div>
+            <div class="stat-label">Boxes disponibles</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red"><i class="fas fa-lock"></i></div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-boxes-occ">—</div>
+            <div class="stat-label">Boxes occupées</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fas fa-users"></i></div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-clients">—</div>
+            <div class="stat-label">Clients actifs</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon cyan"><i class="fas fa-euro-sign"></i></div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-ca">—</div>
+            <div class="stat-label">CA mensuel (TTC)</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon purple"><i class="fas fa-exclamation-circle"></i></div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-retard">—</div>
+            <div class="stat-label">Paiements en retard</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" id="dash-charts">
+        <div class="card">
+          <div class="card-header">
+            <h2><i class="fas fa-chart-pie"></i> Occupation des boxes</h2>
+          </div>
+          <div class="card-body" style="height:260px;display:flex;align-items:center;justify-content:center;">
+            <canvas id="chart-occupation"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h2><i class="fas fa-chart-bar"></i> Revenus mensuels</h2>
+          </div>
+          <div class="card-body" style="height:260px;">
+            <canvas id="chart-revenus"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px">
+        <div class="card">
+          <div class="card-header">
+            <h2><i class="fas fa-clock"></i> Paiements en attente</h2>
+            <button class="btn btn-sm btn-warning" onclick="showPage('paiements')">Voir tout</button>
+          </div>
+          <div id="dash-paiements-list">
+            <div class="loading-spinner"><div class="spinner"></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h2><i class="fas fa-file-contract"></i> Contrats récents</h2>
+            <button class="btn btn-sm btn-primary" onclick="showPage('contrats')">Voir tout</button>
+          </div>
+          <div id="dash-contrats-list">
+            <div class="loading-spinner"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================== PAGE: BOXES ================== -->
+    <div class="page-content hidden" id="page-boxes">
+      <div class="page-header">
+        <div>
+          <h1>Gestion des Boxes</h1>
+          <p>Entrées, sorties et état de chaque espace</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModalBox()">
+          <i class="fas fa-plus"></i> Nouvelle box
+        </button>
+      </div>
+
+      <div class="filters-bar">
+        <span class="filter-label"><i class="fas fa-filter"></i> Filtres :</span>
+        <select class="filter-select" id="filter-box-statut" onchange="filterBoxes()">
+          <option value="">Tous les statuts</option>
+          <option value="disponible">Disponible</option>
+          <option value="occupée">Occupée</option>
+          <option value="maintenance">Maintenance</option>
+          <option value="réservée">Réservée</option>
+        </select>
+        <select class="filter-select" id="filter-box-type" onchange="filterBoxes()">
+          <option value="">Tous les types</option>
+          <option value="small">Petite (2m²)</option>
+          <option value="medium">Moyenne (5m²)</option>
+          <option value="large">Grande (10m²)</option>
+          <option value="xl">XL (20m²)</option>
+        </select>
+        <input type="text" class="filter-input" id="filter-box-search" placeholder="🔍 Rechercher une box..." oninput="filterBoxes()">
+        <button class="btn btn-sm btn-outline" id="btn-view-grid" onclick="setBoxView('grid')" title="Vue grille">
+          <i class="fas fa-th"></i>
+        </button>
+        <button class="btn btn-sm btn-outline" id="btn-view-list" onclick="setBoxView('list')" title="Vue liste">
+          <i class="fas fa-list"></i>
+        </button>
+      </div>
+
+      <!-- Vue Grille -->
+      <div id="boxes-grid-view" class="boxes-grid" style="margin-bottom:20px"></div>
+
+      <!-- Vue Liste -->
+      <div class="card hidden" id="boxes-list-view">
+        <div class="card-header">
+          <h2><i class="fas fa-box"></i> Liste des boxes</h2>
+          <span id="boxes-count" class="badge badge-primary">0 boxes</span>
+        </div>
+        <div class="table-container">
+          <table id="table-boxes">
+            <thead>
+              <tr>
+                <th data-sort="numero">N° Box <span class="sort-icon">↕</span></th>
+                <th data-sort="type_label">Type <span class="sort-icon">↕</span></th>
+                <th data-sort="taille">Taille <span class="sort-icon">↕</span></th>
+                <th data-sort="etage">Étage <span class="sort-icon">↕</span></th>
+                <th data-sort="prix_mensuel">Prix/mois <span class="sort-icon">↕</span></th>
+                <th data-sort="statut">Statut <span class="sort-icon">↕</span></th>
+                <th>Options</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-boxes"></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="pagination-boxes"></div>
+      </div>
+    </div>
+
+    <!-- ================== PAGE: CLIENTS ================== -->
+    <div class="page-content hidden" id="page-clients">
+      <div class="page-header">
+        <div>
+          <h1>Gestion des Clients</h1>
+          <p>Répertoire complet des clients Amanbox</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModalClient()">
+          <i class="fas fa-user-plus"></i> Nouveau client
+        </button>
+      </div>
+
+      <div class="filters-bar">
+        <span class="filter-label"><i class="fas fa-filter"></i> Filtres :</span>
+        <select class="filter-select" id="filter-client-statut" onchange="filterClients()">
+          <option value="">Tous</option>
+          <option value="true">Actifs</option>
+          <option value="false">Inactifs</option>
+          <option value="en_regle">✅ En règle</option>
+          <option value="rp">⚠️ RP – Retard paiement</option>
+        </select>
+        <select class="filter-select" id="filter-client-hub" onchange="filterClients()">
+          <option value="">Tous les hubs</option>
+          <option value="CAS">🔵 CAS – Casablanca</option>
+          <option value="KECH">🟠 KECH – Marrakech</option>
+        </select>
+        <input type="text" class="filter-input" id="filter-client-search" placeholder="🔍 Nom, email, téléphone..." oninput="filterClients()">
+        <button class="btn btn-sm btn-outline" onclick="exportClients()"><i class="fas fa-download"></i> Exporter</button>
+      </div>
+
+      <!-- Liste des clients -->
+      <div id="section-liste-clients">
+        <div class="card">
+          <div class="card-header">
+            <h2><i class="fas fa-users"></i> Clients</h2>
+            <span id="clients-count" class="badge badge-primary">0 clients</span>
+          </div>
+          <div class="table-container">
+            <table id="table-clients">
+              <thead>
+                <tr>
+                  <th>Client</th>
+                  <th data-sort="telephone">Téléphone <span class="sort-icon">↕</span></th>
+                  <th data-sort="box_numero">N° Box <span class="sort-icon">↕</span></th>
+                  <th data-sort="hub">Hub <span class="sort-icon">⇕</span></th>
+                  <th data-sort="date_entree">Date entrée <span class="sort-icon">↕</span></th>
+                  <th data-sort="date_fin">Date fin contrat <span class="sort-icon">↕</span></th>
+                  <th data-sort="prix_mensuel">Prix/mois <span class="sort-icon">↕</span></th>
+                  <th>Caution</th>
+                  <th>Frais reliv.</th>
+                  <th data-sort="prochain_paiement">Prochain paiement <span class="sort-icon">↕</span></th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-clients"></tbody>
+            </table>
+          </div>
+          <div class="pagination" id="pagination-clients"></div>
+        </div>
+      </div>
+
+      <!-- Fiche client inline (remplace la liste quand on clique "Voir") -->
+      <div id="section-fiche-client" style="display:none"></div>
+    </div>
+
+    <!-- ================== PAGE: CONTRATS ================== -->
+    <div class="page-content hidden" id="page-contrats">
+      <div class="page-header">
+        <div>
+          <h1>Gestion des Contrats</h1>
+          <p>Contrats actifs, signatures et archivage</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModalContrat()">
+          <i class="fas fa-plus"></i> Nouveau contrat
+        </button>
+      </div>
+
+      <div class="filters-bar">
+        <span class="filter-label"><i class="fas fa-filter"></i></span>
+        <select class="filter-select" id="filter-contrat-statut" onchange="filterContrats()">
+          <option value="">Tous les statuts</option>
+          <option value="actif">Actif</option>
+          <option value="en_attente">En attente</option>
+          <option value="terminé">Terminé</option>
+          <option value="résilié">Résilié</option>
+        </select>
+        <select class="filter-select" id="filter-contrat-signe" onchange="filterContrats()">
+          <option value="">Signature : tous</option>
+          <option value="complet">Entièrement signés</option>
+          <option value="partiel">Partiellement signés</option>
+          <option value="aucun">Non signés</option>
+        </select>
+        <input type="text" class="filter-input" id="filter-contrat-search" placeholder="🔍 Client, box, n° contrat..." oninput="filterContrats()">
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-file-contract"></i> Contrats</h2>
+          <span id="contrats-count" class="badge badge-primary">0 contrats</span>
+        </div>
+        <div class="table-container">
+          <table id="table-contrats">
+            <thead>
+              <tr>
+                <th data-sort="numero_contrat">N° Contrat <span class="sort-icon">↕</span></th>
+                <th data-sort="client_nom">Client <span class="sort-icon">↕</span></th>
+                <th data-sort="box_numero">Box <span class="sort-icon">↕</span></th>
+                <th data-sort="date_debut">Début <span class="sort-icon">↕</span></th>
+                <th data-sort="date_fin">Fin prévue <span class="sort-icon">↕</span></th>
+                <th data-sort="prix_mensuel">Loyer <span class="sort-icon">↕</span></th>
+                <th>Signatures</th>
+                <th data-sort="statut">Statut <span class="sort-icon">↕</span></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-contrats"></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="pagination-contrats"></div>
+      </div>
+    </div>
+
+    <!-- ================== PAGE: PAIEMENTS ================== -->
+    <div class="page-content hidden" id="page-paiements">
+      <div class="page-header">
+        <div>
+          <h1>Recouvrement critique</h1>
+          <p>Factures en retard — suivi des impayés</p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-outline" onclick="genererFacturesMensuelles()">
+            <i class="fas fa-magic"></i> Générer factures du mois
+          </button>
+          <button class="btn btn-primary" onclick="openModalPaiement()">
+            <i class="fas fa-plus"></i> Nouvelle facture
+          </button>
+        </div>
+      </div>
+
+      <div class="stats-grid" style="margin-bottom:20px;grid-template-columns:repeat(4,1fr)">
+        <!-- KPI 1 : Encaissé -->
+        <div class="stat-card" style="cursor:default">
+          <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+          <div class="stat-info">
+            <div class="stat-value" id="pay-stat-paye" style="font-size:14px">—</div>
+            <div class="stat-label">Encaissé (TTC)</div>
+          </div>
+        </div>
+        <!-- KPI 2 : Factures en retard -->
+        <div class="stat-card" style="cursor:default">
+          <div class="stat-icon"><i class="fas fa-file-invoice"></i></div>
+          <div class="stat-info">
+            <div class="stat-value" id="pay-stat-retard">—</div>
+            <div class="stat-label">Factures en retard</div>
+          </div>
+        </div>
+        <!-- KPI 3 : Clients en retard -->
+        <div class="stat-card" style="cursor:default">
+          <div class="stat-icon"><i class="fas fa-users"></i></div>
+          <div class="stat-info">
+            <div class="stat-value" id="pay-stat-clients-retard">—</div>
+            <div class="stat-label">Clients en retard</div>
+          </div>
+        </div>
+        <!-- KPI 4 : Total dû -->
+        <div class="stat-card" style="cursor:default">
+          <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
+          <div class="stat-info">
+            <div class="stat-value" id="pay-stat-montant-retard" style="font-size:13px">—</div>
+            <div class="stat-label">Total dû en retard</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="filters-bar">
+        <i class="fas fa-filter" style="color:var(--gray-400);font-size:12px"></i>
+        <span class="badge badge-danger">
+          <i class="fas fa-exclamation-triangle"></i> Retards uniquement
+        </span>
+        <select class="filter-select" id="filter-pay-mode" onchange="filterPaiements()" style="min-width:130px">
+          <option value="">Tous modes</option>
+          <option value="virement">Virement</option>
+          <option value="espèces">Espèces</option>
+          <option value="moneytransfert">MoneyTransfert</option>
+        </select>
+        <input type="text" class="filter-input" id="filter-pay-search" placeholder="Rechercher client, facture, box..." oninput="filterPaiements()" style="flex:1;min-width:180px">
+        <input type="month" class="filter-input" id="filter-pay-mois" onchange="filterPaiements()" style="min-width:140px">
+      </div>
+
+      <!-- Liste des factures groupées par client -->
+      <div id="section-liste-paiements">
+        <div class="card">
+          <div class="card-header">
+            <h2>
+              <i class="fas fa-exclamation-circle"></i>
+              Recouvrement critique
+            </h2>
+            <span id="paiements-count" class="badge badge-primary">0 clients</span>
+          </div>
+          <div class="table-container" style="padding:0">
+            <table id="table-paiements" style="width:100%;border-collapse:collapse">
+              <thead>
+                <tr>
+                  <th>Client</th>
+                  <th style="text-align:center">Nb mois</th>
+                  <th>Total TTC</th>
+                  <th>Dernière échéance</th>
+                  <th style="text-align:center">Jours retard</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-paiements"></tbody>
+            </table>
+          </div>
+          <div class="pagination" id="pagination-paiements"></div>
+        </div>
+      </div>
+
+      <!-- Récapitulatif interactif client (inline, remplacement de la popup) -->
+      <div id="section-recap-client" style="display:none">
+        <!-- Le contenu sera injecté dynamiquement par visualiserGroupeFactures() -->
+      </div>
+    </div>
+
+
+    <!-- ================== PAGE: RECOUVREMENT DU MOIS ================== -->
+    <div class="page-content hidden" id="page-recouvrement-mois">
+
+      <!-- ── Vue liste (section principale) ── -->
+      <div id="rmp-section-liste">
+        <div class="page-header">
+          <div>
+            <h1>Recouvrement du mois</h1>
+            <p id="rm-page-subtitle">Paiements attendus ce mois — chargement…</p>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <button class="btn btn-outline" onclick="rmExportCSV()">
+              <i class="fas fa-file-csv"></i> Exporter CSV
+            </button>
+            <button class="btn btn-primary" onclick="loadPage_recouvrement_mois()">
+              <i class="fas fa-sync-alt"></i> Actualiser
+            </button>
+          </div>
+        </div>
+
+        <!-- Barre filtres simple -->
+        <div class="rmp-filter-bar">
+          <div class="rmp-filter-left">
+            <select class="filter-select" id="rmp-filter-statut" onchange="rmpApplyFilter()">
+              <option value="">Tous les statuts</option>
+              <option value="en_attente">En attente</option>
+              <option value="payé">Payé</option>
+              <option value="en_retard">En retard</option>
+            </select>
+            <select class="filter-select" id="rmp-sort" onchange="rmpApplyFilter()">
+              <option value="echeance">Trier : Échéance ↑</option>
+              <option value="montant">Trier : Montant ↓</option>
+              <option value="nom">Trier : Client A→Z</option>
+              <option value="retard">Trier : Retard ↓</option>
+            </select>
+            <input type="text" class="filter-input" id="rmp-search"
+              placeholder="Nom, email, téléphone…"
+              oninput="rmpApplyFilter()" style="width:240px">
+          </div>
+          <div class="rmp-filter-right">
+            <span class="rmp-total-badge" id="rmp-total-badge">0 paiements</span>
+          </div>
+        </div>
+
+        <!-- Tableau principal -->
+        <div class="card" style="overflow:hidden">
+          <div class="card-header" style="display:flex;align-items:center;gap:10px">
+            <i class="fas fa-calendar-alt" style="color:var(--primary)"></i>
+            <span id="rmp-card-title" style="font-weight:600;font-size:14px;color:var(--gray-800)">Paiements du mois</span>
+            <span class="badge-count" id="rmp-badge-count" style="margin-left:4px">0</span>
+          </div>
+          <div class="table-container" style="padding:0">
+            <table class="rmp-simple-table" id="table-rmp">
+              <thead>
+                <tr>
+                  <th>CLIENT</th>
+                  <th>N° BOX</th>
+                  <th>HUB</th>
+                  <th>DATE ÉCHÉANCE <i class="fas fa-sort" style="opacity:.5;font-size:10px"></i></th>
+                  <th>PRIX/MOIS</th>
+                  <th>PAIEMENT DÛ DANS</th>
+                  <th>PROCHAIN PAIEMENT</th>
+                  <th>STATUT</th>
+                  <th style="text-align:center">ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-rmp">
+                <tr><td colspan="9" style="text-align:center;padding:50px;color:var(--gray-400)">
+                  <div class="spinner" style="margin:0 auto 10px"></div>Chargement…
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="rmp-table-footer" id="rmp-table-footer"></div>
+        </div>
+      </div><!-- /rmp-section-liste -->
+
+      <!-- ── Vue détail client (s'affiche au clic sur une ligne) ── -->
+      <div id="rmp-section-detail" style="display:none"></div>
+
+    </div><!-- /page-recouvrement-mois -->
+
+    <!-- ================== PAGE: RELANCES ================== -->
+    <div class="page-content hidden" id="page-relances">
+      <div class="page-header">
+        <div>
+          <h1>Relances &amp; Recouvrement</h1>
+          <p>Suivi des impayés et historique des relances</p>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-warning" onclick="genererRelancesAuto()">
+            <i class="fas fa-magic"></i> Relances automatiques
+          </button>
+        </div>
+      </div>
+
+      <div class="relances-tabs">
+        <div class="relances-tab active" id="tab-impayes" onclick="switchRelancesTab('impayes')">⚠️ Impayés à relancer</div>
+        <div class="relances-tab" id="tab-hist" onclick="switchRelancesTab('hist')">📋 Historique des relances</div>
+      </div>
+
+      <div id="relances-impayes-panel">
+        <div id="relances-impayes-list">
+          <div class="loading-spinner"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+      <div id="relances-hist-panel" style="display:none">
+        <div id="relances-hist-list">
+          <div class="loading-spinner"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================== PAGE: STATS ================== -->
+    <div class="page-content hidden" id="page-stats">
+      <div class="page-header">
+        <div>
+          <h1>Statistiques &amp; Rapports</h1>
+          <p>Analyses détaillées de l'activité Amanbox</p>
+        </div>
+        <button class="btn btn-outline" onclick="exportStatsCSV()">
+          <i class="fas fa-download"></i> Exporter CSV
+        </button>
+      </div>
+
+      <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-bottom:24px">
+        <div class="stat-card"><div class="stat-icon green"><i class="fas fa-percentage"></i></div><div class="stat-info"><div class="stat-value" id="stats-taux-occ">—</div><div class="stat-label">Taux d'occupation</div></div></div>
+        <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-euro-sign"></i></div><div class="stat-info"><div class="stat-value" id="stats-ca-annuel">—</div><div class="stat-label">CA annuel estimé TTC</div></div></div>
+        <div class="stat-card"><div class="stat-icon orange"><i class="fas fa-hand-holding-usd"></i></div><div class="stat-info"><div class="stat-value" id="stats-impaye-total">—</div><div class="stat-label">Total impayés TTC</div></div></div>
+        <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-users"></i></div><div class="stat-info"><div class="stat-value" id="stats-taux-client">—</div><div class="stat-label">Clients avec contrat actif</div></div></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+        <div class="card">
+          <div class="card-header"><h2><i class="fas fa-chart-doughnut"></i> Répartition par type de box</h2></div>
+          <div class="card-body" style="height:280px">
+            <canvas id="chart-stats-types"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h2><i class="fas fa-chart-bar"></i> Paiements par statut</h2></div>
+          <div class="card-body" style="height:280px">
+            <canvas id="chart-stats-payments"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header"><h2><i class="fas fa-chart-line"></i> Évolution des revenus (12 mois)</h2></div>
+        <div class="card-body" style="height:300px">
+          <canvas id="chart-stats-revenus12"></canvas>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div class="card">
+          <div class="card-header"><h2><i class="fas fa-trophy"></i> Top 5 clients (loyer mensuel)</h2></div>
+          <div class="card-body" id="stats-top-clients"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================== PAGE: HISTORIQUE ================== -->
+    <div class="page-content hidden" id="page-historique">
+      <div class="page-header">
+        <div>
+          <h1>Journal d'activité</h1>
+          <p>Toutes les actions enregistrées sur la plateforme</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <div id="historique-list">
+            <div class="loading-spinner"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /app-wrapper -->
+
+<!-- ============== MODAUX ============== -->
+
+<!-- Modal Box -->
+<div class="modal-overlay" id="modal-box">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fas fa-box"></i> <span id="modal-box-title">Nouvelle Box</span></h3>
+      <button class="modal-close" onclick="Modal.close('modal-box')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="form-box" onsubmit="saveBox(event)">
+        <input type="hidden" id="box-id">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Numéro *</label>
+            <input type="text" class="form-control" id="box-numero" placeholder="ex: A01" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Étage *</label>
+            <select class="form-control" id="box-etage" required>
+              <option value="RDC">RDC</option>
+              <option value="1er">1er étage</option>
+              <option value="2ème">2ème étage</option>
+              <option value="3ème">3ème étage</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Type *</label>
+            <select class="form-control" id="box-type" required onchange="updateBoxLabel()">
+              <option value="small">Petite (2m²)</option>
+              <option value="medium">Moyenne (5m²)</option>
+              <option value="large">Grande (10m²)</option>
+              <option value="xl">XL (20m²)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Surface (m²) *</label>
+            <input type="number" class="form-control" id="box-taille" min="1" step="0.5" required>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Prix mensuel HT (€) *</label>
+            <input type="number" class="form-control" id="box-prix" min="1" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Statut *</label>
+            <select class="form-control" id="box-statut" required>
+              <option value="disponible">Disponible</option>
+              <option value="occupée">Occupée</option>
+              <option value="maintenance">Maintenance</option>
+              <option value="réservée">Réservée</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Climatisée</label>
+            <select class="form-control" id="box-clim">
+              <option value="false">Non</option>
+              <option value="true">Oui</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sécurisée (alarme)</label>
+            <select class="form-control" id="box-securite">
+              <option value="true">Oui</option>
+              <option value="false">Non</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-control" id="box-desc" rows="2" placeholder="Description de la box..."></textarea>
+        </div>
+
+        <hr class="divider">
+        <div style="font-size:12px;font-weight:700;color:var(--primary-light);margin-bottom:12px;display:flex;align-items:center;gap:7px;text-transform:uppercase;letter-spacing:.5px">
+          <i class="fas fa-camera"></i> Photo de la box
+        </div>
+        <div class="form-group">
+          <div id="photo-box-zone" onclick="document.getElementById('box-photo-input').click()"
+            style="border:2px dashed var(--gray-300);border-radius:10px;padding:20px;text-align:center;cursor:pointer;background:var(--gray-50);transition:all .2s"
+            ondragover="event.preventDefault();this.style.borderColor='var(--primary-light)'"
+            ondragleave="this.style.borderColor='var(--gray-300)'"
+            ondrop="handlePhotoBoxDrop(event)">
+            <div id="photo-box-placeholder">
+              <i class="fas fa-image" style="font-size:32px;color:var(--gray-300);margin-bottom:8px;display:block"></i>
+              <div style="font-size:13px;color:var(--gray-500);font-weight:600">Cliquer ou glisser-déposer une photo</div>
+              <div style="font-size:11px;color:var(--gray-400);margin-top:4px">JPG, PNG – Max 5 Mo</div>
+            </div>
+            <img id="photo-box-preview" src="" alt="Photo box" style="display:none;max-width:100%;max-height:200px;border-radius:8px;object-fit:cover;margin:0 auto">
+          </div>
+          <input type="file" id="box-photo-input" accept="image/*" style="display:none" onchange="handlePhotoBoxChange(this)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+            <span style="font-size:11px;color:var(--gray-400)" id="photo-box-status">Aucune photo chargée</span>
+            <button type="button" class="btn btn-sm btn-outline" id="btn-clear-photo-box" onclick="clearPhotoBox()" style="display:none">
+              <i class="fas fa-trash"></i> Supprimer la photo
+            </button>
+          </div>
+          <input type="hidden" id="box-photo">
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="Modal.close('modal-box')">Annuler</button>
+      <button class="btn btn-primary" onclick="document.getElementById('form-box').requestSubmit()">
+        <i class="fas fa-save"></i> Enregistrer
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Client -->
+<div class="modal-overlay" id="modal-client">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3><i class="fas fa-user"></i> <span id="modal-client-title">Nouveau Client</span></h3>
+      <button class="modal-close" onclick="Modal.close('modal-client')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="form-client" onsubmit="saveClient(event)">
+        <input type="hidden" id="client-id">
+
+        <!-- Section : Identité -->
+        <div style="font-size:12px;font-weight:700;color:var(--primary-light);margin-bottom:12px;display:flex;align-items:center;gap:7px;text-transform:uppercase;letter-spacing:.5px">
+          <i class="fas fa-user-circle"></i> Identité
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Nom *</label>
+            <input type="text" class="form-control" id="client-nom" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Prénom *</label>
+            <input type="text" class="form-control" id="client-prenom" required>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Email *</label>
+            <input type="email" class="form-control" id="client-email" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Téléphone *</label>
+            <input type="tel" class="form-control" id="client-tel" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Adresse *</label>
+          <input type="text" class="form-control" id="client-adresse" required>
+        </div>
+        <div class="form-grid-3">
+          <div class="form-group">
+            <label class="form-label">Ville *</label>
+            <input type="text" class="form-control" id="client-ville" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Code postal *</label>
+            <input type="text" class="form-control" id="client-cp" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Statut</label>
+            <select class="form-control" id="client-actif">
+              <option value="true">Actif</option>
+              <option value="false">Inactif</option>
+            </select>
+          </div>
+        </div>
+
+        <hr class="divider">
+        <!-- Section : Pièce d'identité -->
+        <div style="font-size:12px;font-weight:700;color:var(--primary-light);margin-bottom:12px;display:flex;align-items:center;gap:7px;text-transform:uppercase;letter-spacing:.5px">
+          <i class="fas fa-id-card"></i> Pièce d'identité
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Type de pièce</label>
+            <select class="form-control" id="client-piece">
+              <option value="Carte Nationale d'Identité">CNI</option>
+              <option value="Passeport">Passeport</option>
+              <option value="Permis de conduire">Permis de conduire</option>
+              <option value="Titre de séjour">Titre de séjour</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">N° de la pièce</label>
+            <input type="text" class="form-control" id="client-num-piece" placeholder="ex: 123456789">
+          </div>
+        </div>
+
+        <!-- Photo pièce d'identité -->
+        <div class="form-group">
+          <label class="form-label"><i class="fas fa-camera"></i> Photo de la pièce d'identité</label>
+          <div id="photo-id-zone" onclick="document.getElementById('client-photo-id-input').click()"
+            style="border:2px dashed var(--gray-300);border-radius:10px;padding:20px;text-align:center;cursor:pointer;background:var(--gray-50);transition:all .2s;position:relative"
+            ondragover="event.preventDefault();this.style.borderColor='var(--primary-light)'"
+            ondragleave="this.style.borderColor='var(--gray-300)'"
+            ondrop="handlePhotoIdDrop(event)">
+            <div id="photo-id-placeholder">
+              <i class="fas fa-id-card" style="font-size:28px;color:var(--gray-300);margin-bottom:8px;display:block"></i>
+              <div style="font-size:13px;color:var(--gray-500);font-weight:600">Cliquer ou glisser-déposer</div>
+              <div style="font-size:11px;color:var(--gray-400);margin-top:4px">JPG, PNG, PDF – Max 5 Mo</div>
+            </div>
+            <img id="photo-id-preview" src="" alt="" style="display:none;max-width:100%;max-height:160px;border-radius:8px;margin:0 auto">
+          </div>
+          <input type="file" id="client-photo-id-input" accept="image/*,application/pdf" style="display:none" onchange="handlePhotoIdChange(this)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+            <span style="font-size:11px;color:var(--gray-400)" id="photo-id-status">Aucune photo chargée</span>
+            <button type="button" class="btn btn-sm btn-outline" id="btn-clear-photo-id" onclick="clearPhotoId()" style="display:none">
+              <i class="fas fa-trash"></i> Supprimer
+            </button>
+          </div>
+          <input type="hidden" id="client-photo-identite">
+        </div>
+
+        <hr class="divider">
+        <!-- Section : Accès & Sécurité -->
+        <div style="font-size:12px;font-weight:700;color:var(--primary-light);margin-bottom:12px;display:flex;align-items:center;gap:7px;text-transform:uppercase;letter-spacing:.5px">
+          <i class="fas fa-lock"></i> Accès & Sécurité
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Mot de passe</label>
+            <input type="text" class="form-control" id="client-mdp" placeholder="Laisser vide pour ne pas changer" autocomplete="new-password">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Rôle</label>
+            <select class="form-control" id="client-role">
+              <option value="client">Client</option>
+              <option value="admin">Administrateur</option>
+            </select>
+          </div>
+        </div>
+
+        <hr class="divider">
+        <!-- Section : Stockage -->
+        <div style="font-size:12px;font-weight:700;color:var(--primary-light);margin-bottom:12px;display:flex;align-items:center;gap:7px;text-transform:uppercase;letter-spacing:.5px">
+          <i class="fas fa-box"></i> Informations de stockage
+        </div>
+        <div class="form-grid-3">
+          <div class="form-group">
+            <label class="form-label"><i class="fas fa-hashtag"></i> N° de Box</label>
+            <select class="form-control" id="client-box-numero">
+              <option value="">— Sélectionner —</option>
+            </select>
+            <div style="font-size:11px;color:var(--gray-400);margin-top:3px">Box attribuée au client</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><i class="fas fa-cubes"></i> Volume stocké (m³)</label>
+            <div style="position:relative">
+              <input type="number" class="form-control" id="client-volume" min="0" step="0.1" placeholder="ex: 4.5">
+              <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--gray-400);pointer-events:none">m³</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><i class="fas fa-euro-sign"></i> Prix mensuel (€ HT)</label>
+            <div style="position:relative">
+              <input type="number" class="form-control" id="client-prix-mensuel" min="0" step="0.01" placeholder="ex: 89.00">
+              <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--gray-400);pointer-events:none">€/mois</span>
+            </div>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label"><i class="fas fa-sign-in-alt"></i> Date d'entrée</label>
+            <input type="date" class="form-control" id="client-date-entree">
+          </div>
+          <div class="form-group">
+            <label class="form-label"><i class="fas fa-calendar-check"></i> Date prochain paiement</label>
+            <input type="date" class="form-control" id="client-prochain-paiement">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label"><i class="fas fa-warehouse"></i> Hub</label>
+          <select class="form-control" id="client-hub">
+            <option value="">— Sélectionner —</option>
+            <option value="CAS">CAS – Casablanca</option>
+            <option value="KECH">KECH – Marrakech</option>
+          </select>
+        </div>
+
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="Modal.close('modal-client')">Annuler</button>
+      <button class="btn btn-primary" onclick="document.getElementById('form-client').requestSubmit()">
+        <i class="fas fa-save"></i> Enregistrer
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Contrat -->
+<div class="modal-overlay" id="modal-contrat">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <h3><i class="fas fa-file-contract"></i> <span id="modal-contrat-title">Nouveau Contrat</span></h3>
+      <button class="modal-close" onclick="Modal.close('modal-contrat')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="form-contrat" onsubmit="saveContrat(event)">
+        <input type="hidden" id="contrat-id">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Client *</label>
+            <select class="form-control" id="contrat-client" required onchange="fillClientInfo()"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Box *</label>
+            <select class="form-control" id="contrat-box" required onchange="fillBoxInfo()"></select>
+          </div>
+        </div>
+        <div class="form-grid-3">
+          <div class="form-group">
+            <label class="form-label">Date de début *</label>
+            <input type="date" class="form-control" id="contrat-debut" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date de fin prévue</label>
+            <input type="date" class="form-control" id="contrat-fin">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Durée min. (mois)</label>
+            <input type="number" class="form-control" id="contrat-duree" min="1" value="1">
+          </div>
+        </div>
+        <div class="form-grid-3">
+          <div class="form-group">
+            <label class="form-label">Prix mensuel HT (MAD) *</label>
+            <input type="number" class="form-control" id="contrat-prix" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Caution (MAD)</label>
+            <input type="number" class="form-control" id="contrat-caution" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Jour prélèvement (1-28)</label>
+            <input type="number" class="form-control" id="contrat-jour" min="1" max="28" value="5">
+          </div>
+        </div>
+        <div class="form-grid-3">
+          <div class="form-group">
+            <label class="form-label">Hub</label>
+            <select class="form-control" id="contrat-hub">
+              <option value="">— Sélectionner —</option>
+              <option value="CAS">CAS – Casablanca</option>
+              <option value="KECH">KECH – Marrakech</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Paiement avec caution ?</label>
+            <select class="form-control" id="contrat-avec-caution">
+              <option value="true">✅ Avec caution</option>
+              <option value="false">❌ Sans caution</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Frais relivraison inclus ?</label>
+            <select class="form-control" id="contrat-frais-reliv">
+              <option value="false">❌ Non inclus</option>
+              <option value="true">✅ Inclus</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-control" id="contrat-notes" rows="2"></textarea>
+        </div>
+
+        <hr class="divider">
+        <h4 style="font-size:14px;font-weight:700;color:var(--gray-700);margin-bottom:16px">
+          <i class="fas fa-pen-nib" style="color:var(--primary-light)"></i> Signature électronique – Administrateur
+        </h4>
+        <p style="font-size:12px;color:var(--gray-500);margin-bottom:12px">Signez ci-dessous pour valider le contrat en tant qu'administrateur :</p>
+        <div class="signature-wrapper">
+          <canvas id="sig-admin" width="700" height="150"></canvas>
+          <div class="signature-placeholder" id="sig-admin-placeholder">
+            <i class="fas fa-signature" style="font-size:28px;margin-bottom:6px"></i><br>Signez ici
+          </div>
+        </div>
+        <div class="signature-actions">
+          <button type="button" class="btn btn-sm btn-outline" id="btn-clear-sig-admin">
+            <i class="fas fa-eraser"></i> Effacer
+          </button>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="Modal.close('modal-contrat')">Annuler</button>
+      <button class="btn btn-primary" onclick="document.getElementById('form-contrat').requestSubmit()">
+        <i class="fas fa-save"></i> Enregistrer le contrat
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Paiement -->
+<div class="modal-overlay" id="modal-paiement">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fas fa-credit-card"></i> <span id="modal-paiement-title">Nouvelle Facture</span></h3>
+      <button class="modal-close" onclick="Modal.close('modal-paiement')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="form-paiement" onsubmit="savePaiement(event)">
+        <input type="hidden" id="paiement-id">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Contrat *</label>
+            <select class="form-control" id="pay-contrat" required onchange="fillPayContrat()"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Période *</label>
+            <input type="text" class="form-control" id="pay-periode" placeholder="ex: Janvier 2025" required>
+          </div>
+        </div>
+        <div class="form-grid-3">
+          <div class="form-group">
+            <label class="form-label">Montant HT (€) *</label>
+            <input type="number" class="form-control" id="pay-ht" step="0.01" required oninput="calcPay()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">TVA (€)</label>
+            <input type="number" class="form-control" id="pay-tva" step="0.01" readonly>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Montant TTC (€)</label>
+            <input type="number" class="form-control" id="pay-ttc" step="0.01" readonly>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Date d'échéance *</label>
+            <input type="date" class="form-control" id="pay-echeance" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mode de paiement</label>
+            <select class="form-control" id="pay-mode">
+              <option value="virement">Virement</option>
+              <option value="espèces">Espèces</option>
+              <option value="moneytransfert">MoneyTransfert</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Statut *</label>
+            <select class="form-control" id="pay-statut" required onchange="togglePayDate()">
+              <option value="en_attente">En attente</option>
+              <option value="payé">Payé</option>
+              <option value="en_retard">En retard</option>
+              <option value="annulé">Annulé</option>
+            </select>
+          </div>
+          <div class="form-group" id="pay-date-group">
+            <label class="form-label">Date de paiement</label>
+            <input type="date" class="form-control" id="pay-date">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Référence transaction</label>
+          <input type="text" class="form-control" id="pay-ref" placeholder="ex: VIR-20250101-001">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <input type="text" class="form-control" id="pay-notes">
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="Modal.close('modal-paiement')">Annuler</button>
+      <button class="btn btn-primary" onclick="document.getElementById('form-paiement').requestSubmit()">
+        <i class="fas fa-save"></i> Enregistrer
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal Détail Contrat / Signature -->
+
+<div class="modal-overlay" id="modal-contrat-detail">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <h3><i class="fas fa-file-contract"></i> Détail du Contrat</h3>
+      <button class="modal-close" onclick="Modal.close('modal-contrat-detail')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="modal-contrat-detail-body">
+      <div class="loading-spinner"><div class="spinner"></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="Modal.close('modal-contrat-detail')">Fermer</button>
+      <button class="btn btn-success" id="btn-sign-admin-contrat" onclick="signerContratAdmin()">
+        <i class="fas fa-pen-nib"></i> Signer le contrat
+      </button>
+      <button class="btn btn-primary" onclick="imprimerContrat()">
+        <i class="fas fa-print"></i> Imprimer
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="js/utils.js"></script>
+<script src="js/admin.js"></script>
+
+<!-- ═══════════ MODAL APERÇU FACTURE (récap paiements) ═══════════ -->
+<div id="rc-modal-facture" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.65);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)rcFermerModalFacture()">
+  <div style="background:#fff;border-radius:16px;box-shadow:0 24px 64px rgba(0,0,0,.25);width:100%;max-width:820px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;animation:rcFadeIn .22s ease">
+    <!-- Barre de titre -->
+    <div style="background:var(--gray-800);color:#fff;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:10px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span style="font-size:15px;font-weight:700">Facture <span id="rc-facture-num">—</span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <!-- Imprimer -->
+        <button onclick="rcImprimerFactureModal()" title="Imprimer"
+          style="display:flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s"
+          onmouseover="this.style.background='rgba(255,255,255,.22)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Imprimer
+        </button>
+        <!-- Télécharger -->
+        <button onclick="rcTelechargerfactureModal()" title="Télécharger en HTML"
+          style="display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s"
+          onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Télécharger
+        </button>
+        <!-- Partager -->
+        <button onclick="rcPartagerFactureModal()" title="Partager / Copier"
+          style="display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--gray-600);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s"
+          onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Partager
+        </button>
+        <!-- Fermer -->
+        <button onclick="rcFermerModalFacture()" title="Fermer"
+          style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;transition:.15s;margin-left:4px"
+          onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">✕</button>
+      </div>
+    </div>
+    <!-- Aperçu scrollable -->
+    <div id="rc-facture-preview" style="overflow-y:auto;flex:1;padding:0;background:#f3f4f6">
+      <!-- contenu injecté par rcVoirFacture() -->
+    </div>
+  </div>
+</div>
+<style>
+  @keyframes rcFadeIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+</style>
+</body>
+</html>
